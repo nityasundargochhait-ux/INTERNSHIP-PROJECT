@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="An internship project exploring fish-weight prediction with multiple linear regression.">
+    <title>Fish Weight Prediction | Machine Learning Project</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #122a35;
+            --muted: #58717b;
+            --paper: #f5f8f6;
+            --white: #fff;
+            --teal: #087e78;
+            --deep-teal: #075b59;
+            --lime: #d7ed9b;
+            --line: #dce7e3;
+            --shadow: 0 18px 50px rgba(13, 57, 57, .09);
+        }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            line-height: 1.6;
+        }
+        a { color: inherit; }
+        .wrap { width: min(1120px, calc(100% - 40px)); margin-inline: auto; }
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 76px;
+            gap: 24px;
+        }
+        .brand { display: flex; align-items: center; gap: 11px; font-weight: 750; letter-spacing: -.03em; }
+        .brand-mark {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            place-items: center;
+            border-radius: 12px;
+            background: var(--deep-teal);
+            color: white;
+            font-size: 19px;
+        }
+        nav { display: flex; flex-wrap: wrap; gap: 26px; }
+        nav a { color: var(--muted); font-size: 14px; text-decoration: none; }
+        nav a:hover { color: var(--teal); }
+        .hero {
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1.15fr .85fr;
+            align-items: center;
+            gap: 40px;
+            min-height: 455px;
+            padding: 66px 7%;
+            border-radius: 28px;
+            background: linear-gradient(120deg, #073e45, #087e78 70%, #31a18a);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+        .hero::after {
+            position: absolute;
+            right: -100px;
+            bottom: -240px;
+            width: 520px;
+            height: 520px;
+            border: 1px solid rgba(255,255,255,.16);
+            border-radius: 50%;
+            content: "";
+            box-shadow: 0 0 0 48px rgba(255,255,255,.035), 0 0 0 96px rgba(255,255,255,.025);
+        }
+        .eyebrow { color: var(--lime); font-size: 12px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+        h1 { max-width: 610px; margin: 14px 0 18px; font-size: clamp(42px, 6vw, 68px); line-height: 1.02; letter-spacing: -.055em; }
+        .hero p { max-width: 570px; margin: 0; color: rgba(255,255,255,.82); font-size: 17px; }
+        .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 45px;
+            padding: 0 18px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            background: var(--lime);
+            color: #173c35;
+            font-size: 14px;
+            font-weight: 750;
+            text-decoration: none;
+        }
+        .button.secondary { border-color: rgba(255,255,255,.35); background: transparent; color: white; }
+        .fish-art { position: relative; z-index: 1; display: grid; min-height: 240px; place-items: center; }
+        .fish-icon { width: min(100%, 310px); filter: drop-shadow(0 22px 18px rgba(0,0,0,.18)); }
+        .stats {
+            position: relative;
+            z-index: 2;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin: -35px auto 0;
+            width: 88%;
+        }
+        .stat { padding: 19px 21px; border: 1px solid var(--line); border-radius: 15px; background: white; box-shadow: 0 10px 24px rgba(13,57,57,.06); }
+        .stat strong { display: block; color: var(--deep-teal); font-size: 25px; letter-spacing: -.04em; }
+        .stat span { color: var(--muted); font-size: 12px; }
+        main { padding-bottom: 52px; }
+        section { padding-top: 82px; scroll-margin-top: 20px; }
+        .section-head { max-width: 650px; margin-bottom: 28px; }
+        .section-kicker { color: var(--teal); font-size: 11px; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+        h2 { margin: 7px 0 10px; font-size: clamp(28px, 4vw, 40px); line-height: 1.15; letter-spacing: -.045em; }
+        .section-head p, .copy { color: var(--muted); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { padding: 25px; border: 1px solid var(--line); border-radius: 18px; background: white; }
+        .card h3 { margin: 0 0 8px; font-size: 18px; letter-spacing: -.025em; }
+        .card p { margin: 0; color: var(--muted); }
+        .dataset-link { display: inline-flex; margin-top: 18px; color: var(--teal); font-size: 14px; font-weight: 750; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+        .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+        .feature { min-height: 126px; padding: 20px; border: 1px solid var(--line); border-radius: 15px; background: white; }
+        .feature b { display: block; margin-bottom: 5px; }
+        .feature span { color: var(--muted); font-size: 13px; }
+        .pipeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; counter-reset: step; }
+        .step { position: relative; min-height: 155px; padding: 20px; border-radius: 16px; background: #e9f1ed; }
+        .step::before { counter-increment: step; content: "0" counter(step); display: block; margin-bottom: 16px; color: var(--teal); font-size: 12px; font-weight: 850; letter-spacing: .1em; }
+        .step h3 { margin: 0 0 6px; font-size: 16px; }
+        .step p { margin: 0; color: var(--muted); font-size: 13px; }
+        .results { display: grid; grid-template-columns: .9fr 1.1fr; gap: 20px; align-items: stretch; }
+        .result-card { padding: 28px; border-radius: 18px; background: var(--deep-teal); color: white; }
+        .result-card .big { margin: 14px 0 3px; color: var(--lime); font-size: 56px; font-weight: 800; line-height: 1; letter-spacing: -.06em; }
+        .result-card p { color: rgba(255,255,255,.76); }
+        .metric-card { padding: 27px; border: 1px solid var(--line); border-radius: 18px; background: white; }
+        .metric-row { display: flex; justify-content: space-between; gap: 16px; margin: 14px 0 7px; font-size: 14px; font-weight: 700; }
+        .track { height: 9px; overflow: hidden; border-radius: 20px; background: #e7eeeb; }
+        .bar { height: 100%; border-radius: inherit; background: linear-gradient(90deg, #087e78, #9cca64); }
+        .note { margin-top: 14px; color: var(--muted); font-size: 12px; }
+        .callout { padding: 22px 25px; border-left: 4px solid #91b856; border-radius: 0 14px 14px 0; background: #edf4df; color: #425645; }
+        .predictor { display: grid; grid-template-columns: 1.15fr .85fr; gap: 20px; align-items: start; }
+        .form-card, .prediction-card { padding: 26px; border: 1px solid var(--line); border-radius: 18px; background: white; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .field { display: grid; gap: 6px; }
+        .field label { font-size: 13px; font-weight: 750; }
+        .field input, .field select { width: 100%; min-height: 44px; padding: 9px 11px; border: 1px solid #cbd9d4; border-radius: 9px; background: white; color: var(--ink); font: inherit; }
+        .field input:focus, .field select:focus { outline: 3px solid rgba(8,126,120,.2); border-color: var(--teal); }
+        .field small { color: var(--muted); font-size: 11px; }
+        .form-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .action-button { min-height: 44px; padding: 0 16px; border: 1px solid var(--teal); border-radius: 9px; background: var(--teal); color: white; font: inherit; font-size: 14px; font-weight: 750; cursor: pointer; }
+        .action-button.secondary { background: white; color: var(--teal); }
+        .prediction-card { min-height: 235px; background: #e9f3ed; }
+        .prediction-card .result-label { color: var(--deep-teal); font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+        .prediction-value { margin: 14px 0 8px; color: var(--deep-teal); font-size: clamp(36px, 5vw, 52px); font-weight: 850; line-height: 1.1; letter-spacing: -.05em; }
+        .prediction-card p { margin: 0; color: var(--muted); font-size: 14px; }
+        .prediction-card .prediction-warning { margin-top: 14px; color: #8a4c13; font-size: 12px; }
+        .model-details { margin-top: 20px; color: var(--muted); font-size: 12px; }
+        .model-details summary { color: var(--teal); font-weight: 750; cursor: pointer; }
+        .model-details code { color: var(--ink); overflow-wrap: anywhere; }
+        footer { padding: 27px 0 36px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+        footer .wrap { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+        @media (max-width: 760px) {
+            .topbar { align-items: flex-start; flex-direction: column; justify-content: center; padding: 16px 0; }
+            nav { gap: 16px; }
+            .hero { grid-template-columns: 1fr; gap: 8px; min-height: auto; padding: 45px 8%; }
+            .fish-art { min-height: 150px; }
+            .fish-icon { width: 210px; }
+            .stats { grid-template-columns: repeat(2, 1fr); width: 94%; }
+            .grid-2, .results, .predictor { grid-template-columns: 1fr; }
+            .feature-grid { grid-template-columns: repeat(2, 1fr); }
+            .pipeline { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 440px) {
+            .wrap { width: min(100% - 28px, 1120px); }
+            .stats { width: 100%; gap: 8px; }
+            .stat { padding: 15px; }
+            .stat strong { font-size: 21px; }
+            .feature-grid, .form-grid { grid-template-columns: 1fr; }
+            .hero { border-radius: 20px; }
+            section { padding-top: 60px; }
+        }
+    </style>
+</head>
+<body>
+    <header class="wrap topbar">
+        <a class="brand" href="#" aria-label="Fish Weight Prediction home">
+            <span class="brand-mark" aria-hidden="true">≈</span>
+            <span>Data in the Deep</span>
+        </a>
+        <nav aria-label="Main navigation">
+            <a href="#overview">Overview</a>
+            <a href="#data">Dataset</a>
+            <a href="#method">Method</a>
+            <a href="#predictor">Try the model</a>
+            <a href="#results">Results</a>
+        </nav>
+    </header>
+
+    <main class="wrap">
+        <section class="hero" aria-labelledby="page-title">
+            <div>
+                <div class="eyebrow">Machine learning · Internship project</div>
+                <h1 id="page-title">Fish Weight Prediction</h1>
+                <p>Can a fish’s measurements tell us how much it weighs? This project explores that question with data analysis and a multiple linear regression model.</p>
+                <div class="actions">
+                    <a class="button" href="#predictor">Try the predictor <span aria-hidden="true">&nbsp;↓</span></a>
+                    <a class="button secondary" href="https://github.com/ybifoundation/Dataset/raw/main/Fish.csv" target="_blank" rel="noopener noreferrer">View dataset</a>
+                </div>
+            </div>
+            <div class="fish-art" aria-hidden="true">
+                <svg class="fish-icon" viewBox="0 0 340 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M37 110C78 53 173 42 251 91L312 55L301 110L312 165L251 129C173 178 78 167 37 110Z" fill="#D7ED9B"/>
+                    <path d="M104 72L143 28L173 65M106 148L145 191L176 153" fill="#9CCA64"/>
+                    <path d="M36 110C68 108 83 92 91 73" stroke="#F5F8F6" stroke-opacity=".75" stroke-width="4" stroke-linecap="round"/>
+                    <circle cx="224" cy="99" r="6" fill="#073E45"/>
+                    <path d="M119 110C148 84 179 82 202 108C180 137 149 137 119 110Z" fill="#9CCA64" fill-opacity=".72"/>
+                    <path d="M252 92L270 110L252 128" stroke="#F5F8F6" stroke-opacity=".75" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </section>
+
+        <div class="stats" aria-label="Project at a glance">
+            <div class="stat"><strong>159</strong><span>fish records</span></div>
+            <div class="stat"><strong>6</strong><span>model features</span></div>
+            <div class="stat"><strong>70 / 30</strong><span>train / test split</span></div>
+            <div class="stat"><strong>0.840</strong><span>test-set R² score</span></div>
+        </div>
+
+        <section id="overview">
+            <div class="section-head">
+                <div class="section-kicker">01 · The question</div>
+                <h2>Turning measurements into an estimate</h2>
+                <p>This supervised-learning project uses physical measurements to estimate fish weight in grams. The goal is to understand how well a straightforward regression model captures the relationship in the available data.</p>
+            </div>
+            <div class="grid-2">
+                <article class="card">
+                    <h3>Project objective</h3>
+                    <p>Train a model to predict the continuous target <strong>Weight</strong> from a fish’s category and body measurements, then evaluate its performance on held-out records.</p>
+                </article>
+                <article class="card">
+                    <h3>Why regression?</h3>
+                    <p>Weight is a numeric quantity. Linear regression offers an interpretable baseline that connects each input feature to a predicted value.</p>
+                </article>
+            </div>
+        </section>
+
+        <section id="data">
+            <div class="section-head">
+                <div class="section-kicker">02 · The data</div>
+                <h2>A small dataset, with useful signals</h2>
+                <p>The project uses the Fish dataset: 159 observations across seven fish categories. The supplied records have no missing values in the eight columns shown.</p>
+                <a class="dataset-link" href="https://github.com/ybifoundation/Dataset/raw/main/Fish.csv" target="_blank" rel="noopener noreferrer">Open the original CSV ↗</a>
+            </div>
+            <div class="feature-grid">
+                <div class="feature"><b>Category</b><span>Numeric category code included as a model feature.</span></div>
+                <div class="feature"><b>Height &amp; Width</b><span>Body height and diagonal width measurements, in cm.</span></div>
+                <div class="feature"><b>Length 1</b><span>First recorded length measurement, in cm.</span></div>
+                <div class="feature"><b>Length 2</b><span>Second recorded length measurement, in cm.</span></div>
+                <div class="feature"><b>Length 3</b><span>Third recorded length measurement, in cm.</span></div>
+                <div class="feature"><b>Target · Weight</b><span>Fish weight in grams, predicted by the model.</span></div>
+            </div>
+        </section>
+
+        <section id="method">
+            <div class="section-head">
+                <div class="section-kicker">03 · The workflow</div>
+                <h2>From raw data to model evaluation</h2>
+                <p>A simple, reproducible baseline keeps the analysis easy to follow.</p>
+            </div>
+            <div class="pipeline">
+                <article class="step"><h3>Load &amp; inspect</h3><p>Read the CSV with pandas and review columns, data types, and summary statistics.</p></article>
+                <article class="step"><h3>Choose features</h3><p>Use Category, Height, Width, and Length1–Length3 to predict Weight.</p></article>
+                <article class="step"><h3>Split &amp; train</h3><p>Reserve 30% for testing; fit LinearRegression on the remaining 70%.</p></article>
+                <article class="step"><h3>Measure performance</h3><p>Evaluate held-out predictions with mean absolute error and R².</p></article>
+            </div>
+        </section>
+
+        <section id="predictor">
+            <div class="section-head">
+                <div class="section-kicker">04 · Try the model</div>
+                <h2>Estimate a fish’s weight</h2>
+                <p>Enter measurements in centimetres and get an estimate in grams. This calculator uses the exact intercept and coefficients reported by the notebook’s trained linear regression model.</p>
+            </div>
+            <div class="predictor">
+                <form class="form-card" id="prediction-form">
+                    <div class="form-grid">
+                        <div class="field">
+                            <label for="category">Category code</label>
+                            <select id="category" name="category" required>
+                                <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                                <option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option>
+                            </select>
+                            <small>Numeric category used during training (1–7).</small>
+                        </div>
+                        <div class="field">
+                            <label for="height">Height (cm)</label>
+                            <input id="height" name="height" type="number" min="1.7284" max="18.957" step="any" required>
+                            <small>Observed range: 1.7284–18.957 cm.</small>
+                        </div>
+                        <div class="field">
+                            <label for="width">Width (cm)</label>
+                            <input id="width" name="width" type="number" min="1.0476" max="8.142" step="any" required>
+                            <small>Observed range: 1.0476–8.142 cm.</small>
+                        </div>
+                        <div class="field">
+                            <label for="length1">Length 1 (cm)</label>
+                            <input id="length1" name="length1" type="number" min="7.5" max="59" step="any" required>
+                            <small>Observed range: 7.5–59 cm.</small>
+                        </div>
+                        <div class="field">
+                            <label for="length2">Length 2 (cm)</label>
+                            <input id="length2" name="length2" type="number" min="8.4" max="63.4" step="any" required>
+                            <small>Observed range: 8.4–63.4 cm.</small>
+                        </div>
+                        <div class="field">
+                            <label for="length3">Length 3 (cm)</label>
+                            <input id="length3" name="length3" type="number" min="8.8" max="68" step="any" required>
+                            <small>Observed range: 8.8–68 cm.</small>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button class="action-button" type="submit">Predict weight</button>
+                        <button class="action-button secondary" type="button" id="sample-button">Try sample fish</button>
+                    </div>
+                </form>
+                <div class="prediction-card" aria-live="polite" aria-atomic="true">
+                    <div class="result-label">Estimated weight</div>
+                    <div class="prediction-value" id="prediction-value">—</div>
+                    <p id="prediction-message">Enter all six measurements and select “Predict weight” to see the estimate.</p>
+                    <p class="prediction-warning" id="prediction-warning" hidden></p>
+                </div>
+            </div>
+            <details class="model-details">
+                <summary>Show the model equation</summary>
+                <p><code>Weight = -684.4236 + 35.1963×Category + 52.1937×Height - 37.1387×Width + 11.2218×Length1 + 78.1123×Length2 - 59.1178×Length3</code></p>
+                <p>Features and coefficients follow the order used in the notebook. The category is treated as a numeric code, just as in the original model.</p>
+            </details>
+        </section>
+
+        <section id="results">
+            <div class="section-head">
+                <div class="section-kicker">05 · The results</div>
+                <h2>A promising baseline, with room to improve</h2>
+                <p>These are the reported metrics from the notebook’s 48-record test set.</p>
+            </div>
+            <div class="results">
+                <article class="result-card">
+                    <div class="eyebrow">Test-set coefficient of determination</div>
+                    <div class="big">0.840</div>
+                    <p>R² = 0.8398. On this split, the model explains about 84% of the variation in observed fish weights.</p>
+                </article>
+                <article class="metric-card">
+                    <h3>How to read the metrics</h3>
+                    <div class="metric-row"><span>R² score</span><span>0.8398 / 1.0</span></div>
+                    <div class="track" role="img" aria-label="R squared score: 83.98 percent"><div class="bar" style="width:83.98%"></div></div>
+                    <div class="metric-row"><span>Mean absolute error</span><span>99.59 g</span></div>
+                    <p class="note">MAE is the average absolute difference between predicted and actual weight on the test set. It is measured in grams; lower is better.</p>
+                </article>
+            </div>
+            <div class="callout" style="margin-top:20px">
+                <strong>Important limitation:</strong> These results come from one train/test split, not repeated cross-validation. Linear regression can also produce implausible negative estimates and may not capture non-linear growth patterns. Treat this as an educational baseline, not a production or scientific weighing tool.
+            </div>
+        </section>
+
+        <section>
+            <div class="section-head">
+                <div class="section-kicker">06 · Next steps</div>
+                <h2>What I would explore next</h2>
+            </div>
+            <div class="grid-2">
+                <article class="card"><h3>Stronger validation</h3><p>Use cross-validation and compare errors across different splits to check how stable the model is.</p></article>
+                <article class="card"><h3>Better feature handling</h3><p>Represent species as a categorical variable, investigate correlated length measurements, and compare non-linear models.</p></article>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="wrap">
+            <span>Fish Weight Prediction · Machine Learning Internship Project</span>
+            <span>Built with HTML, CSS &amp; JavaScript</span>
+        </div>
+    </footer>
+    <script>
+        const modelIntercept = -684.4235918478537;
+        const modelCoefficients = [35.19634977, 52.19372157, -37.13869125, 11.2218449, 78.11233002, -59.11783139];
+        const predictionForm = document.getElementById("prediction-form");
+        const predictionValue = document.getElementById("prediction-value");
+        const predictionMessage = document.getElementById("prediction-message");
+        const predictionWarning = document.getElementById("prediction-warning");
+
+        function predictWeight(values) {
+            return modelIntercept + values.reduce((total, value, index) => total + value * modelCoefficients[index], 0);
+        }
+
+        predictionForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            if (!predictionForm.reportValidity()) return;
+
+            const values = ["category", "height", "width", "length1", "length2", "length3"]
+                .map((name) => Number(predictionForm.elements[name].value));
+            const estimate = predictWeight(values);
+            predictionValue.textContent = `${estimate.toFixed(2)} g`;
+            predictionMessage.textContent = "Model estimate based on the measurements you entered.";
+            predictionWarning.hidden = estimate >= 0;
+            predictionWarning.textContent = estimate < 0
+                ? "This model returned a negative weight, which is not physically possible. Treat this estimate as unreliable."
+                : "";
+        });
+
+        document.getElementById("sample-button").addEventListener("click", () => {
+            const sample = { category: 1, height: 11.52, width: 4.02, length1: 23.2, length2: 25.4, length3: 30 };
+            Object.entries(sample).forEach(([name, value]) => { predictionForm.elements[name].value = value; });
+            predictionForm.requestSubmit();
+        });
+    </script>
+</body>
+</html>
